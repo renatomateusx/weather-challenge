@@ -9,14 +9,21 @@ import UIKit
 
 class HomeViewController: UIViewController {
     
+    // MARK: - Outlets
+    @IBOutlet weak var cityTextField: UITextField!
+    @IBOutlet weak var showActionButton: UIButton!
+    @IBOutlet weak var resultContentView: UIView!
+    @IBOutlet weak var temperatureLabel: UILabel!
+    @IBOutlet weak var pressureLabel: UILabel!
+    @IBOutlet weak var humidityLabel: UILabel!
+    @IBOutlet weak var currentConditionLabel: UILabel!
+    @IBOutlet weak var precipitationChanceLabel: UILabel!
+    
+    
     // MARK: - Private Properties
     var loading: UIActivityIndicatorView?
     internal let viewModel = HomeViewModel(with: WeatherService())
     var weather: WeatherModel?
-    
-    // MARK: - Outlets
-    @IBOutlet weak var cityTextField: UITextField!
-    @IBOutlet weak var showActionButton: UIButton!
     
     // MARK: - LifeCycle
     override func viewDidLoad() {
@@ -39,25 +46,52 @@ extension HomeViewController {
             loading.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
         }
         
+        /// Result Content View shadow
+        resultContentView.layer.cornerRadius = 20.0
+        resultContentView.clipsToBounds = true
+        resultContentView.layer.masksToBounds = false
+        resultContentView.layer.shadowColor = UIColor.gray.cgColor
+        resultContentView.layer.shadowOffset = CGSize(width: -1, height: 5)
+        resultContentView.layer.shadowOpacity = 0.7
+        resultContentView.layer.shadowRadius = 4.0
+        
         self.showActionButton.addTarget(self, action: #selector(didActionButtonTapped), for: .touchUpInside)
+        
+        self.resultContentView.isHidden = true
     }
     
     /// Shows project's default loading on the UITableView.
     func showLoad() {
-        loading?.startAnimating()
+        DispatchQueue.main.async {
+            self.loading?.startAnimating()
+        }
     }
     
     /// Hides any visible loading from the UITableView.
     func hideLoad() {
-        self.loading?.stopAnimating()
+        DispatchQueue.main.async {
+            self.loading?.stopAnimating()
+        }
     }
     
     func showDataRetrieved() {
-        
+        DispatchQueue.main.async {
+            if let weather = self.weather {
+                self.temperatureLabel.text = "Temperature: \(weather.temperature )"
+                self.pressureLabel.text = "Pressure: \(weather.wind)"
+                self.humidityLabel.text = "Humidity: Not informed"
+                self.currentConditionLabel.text = "Current Condition: \(weather.description)"
+                self.precipitationChanceLabel.text = "Chances of precipitation: Not informed"
+            }
+            self.resultContentView.isHidden = false
+        }
     }
     
     func hideDataRetrieved() {
-        
+        DispatchQueue.main.async {
+            self.resultContentView.isHidden = true
+            self.alert(title: "Oops", message: "Nothing to show")
+        }
     }
 }
 
