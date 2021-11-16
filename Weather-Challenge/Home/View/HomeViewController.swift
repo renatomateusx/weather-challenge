@@ -23,7 +23,6 @@ class HomeViewController: UIViewController {
     // MARK: - Private Properties
     var loading: UIActivityIndicatorView?
     internal let viewModel = HomeViewModel(with: WeatherService())
-    var weather: WeatherModel?
     
     // MARK: - LifeCycle
     override func viewDidLoad() {
@@ -74,15 +73,13 @@ extension HomeViewController {
         }
     }
     
-    func showDataRetrieved() {
+    func showDataRetrieved(weather: WeatherModel) {
         DispatchQueue.main.async {
-            if let weather = self.weather {
-                self.temperatureLabel.text = "Temperature: \(weather.temperature )"
-                self.pressureLabel.text = "Pressure: \(weather.wind)"
-                self.humidityLabel.text = "Humidity: Not informed"
-                self.currentConditionLabel.text = "Current Condition: \(weather.description)"
-                self.precipitationChanceLabel.text = "Chances of precipitation: Not informed"
-            }
+            self.temperatureLabel.text = "Temperature: \(weather.temperature )"
+            self.pressureLabel.text = "Pressure: \(weather.wind)"
+            self.humidityLabel.text = "Humidity: Not informed"
+            self.currentConditionLabel.text = "Current Condition: \(weather.description)"
+            self.precipitationChanceLabel.text = "Chances of precipitation: Not informed"
             self.resultContentView.isHidden = false
         }
     }
@@ -107,9 +104,7 @@ extension HomeViewController {
 
 extension HomeViewController: HomeViewModelDelegate {
     func onSuccessFetchingWeather(weather: WeatherModel) {
-        self.weather = weather
-        
-        self.showDataRetrieved()
+        self.showDataRetrieved(weather: weather)
         self.hideLoad()
     }
     
@@ -127,7 +122,7 @@ extension HomeViewController {
     func didActionButtonTapped() {
         self.showLoad()
         if let textCity = self.cityTextField.text {
-            self.viewModel.fetchData(textCity)
+            self.viewModel.fetchData(textCity.replacingOccurrences(of: " ", with: "+"))
         }
     }
 }
